@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Paper
+ */
+
+* {
+    background:     #FAFAFAFF;
+    background-alt: #F0F0F0FF;
+    foreground:     #424242FF;
+    selected:       #90A4AEFF;
+    active:         #8BC34AFF;
+    urgent:         #E53935FF;
+}

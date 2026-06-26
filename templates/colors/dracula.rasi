@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Dracula
+ */
+
+* {
+    background:     #282A36FF;
+    background-alt: #44475AFF;
+    foreground:     #F8F8F2FF;
+    selected:       #BD93F9FF;
+    active:         #50FA7BFF;
+    urgent:         #FF5555FF;
+}

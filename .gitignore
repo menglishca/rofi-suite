@@ -1,0 +1,21 @@
+# Build output
+/output/
+
+# Archive of old files
+/archive/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# User configuration overrides
+/user_config.json
+
+# Nix build artifacts
+/result
+/result-*

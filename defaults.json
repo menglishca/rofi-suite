@@ -1,0 +1,661 @@
+{
+  "theme": {
+    "type": "bordered",
+    "color_scheme": "nord",
+    "style_overrides": {}
+  },
+  "applets": {
+    "apps": {
+      "prompt": {
+        "message": "Applications",
+        "icon": ""
+      },
+      "message": "Installed Packages : $(pacman -Q | wc -l) (pacman)",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "horizontal": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "bordered": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 6
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Terminal",
+            "icon": ""
+          },
+          "command": "alacritty"
+        },
+        {
+          "label": {
+            "text": "Files",
+            "icon": ""
+          },
+          "command": "thunar"
+        },
+        {
+          "label": {
+            "text": "Editor",
+            "icon": ""
+          },
+          "command": "geany"
+        },
+        {
+          "label": {
+            "text": "Browser",
+            "icon": ""
+          },
+          "command": "firefox"
+        },
+        {
+          "label": {
+            "text": "Music",
+            "icon": ""
+          },
+          "command": "alacritty -e ncmpcpp"
+        },
+        {
+          "label": {
+            "text": "Settings",
+            "icon": ""
+          },
+          "command": "xfce4-settings-manager"
+        }
+      ]
+    },
+    "powermenu": {
+      "prompt": {
+        "message": "$(hostname)",
+        "icon": ""
+      },
+      "message": "Uptime : $(uptime -p | sed -e 's/up //g')",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "horizontal": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "bordered": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 6
+        }
+      },
+      "confirm_title": "Confirmation",
+      "confirm_message": "Are you Sure?",
+      "confirm_yes": " Yes",
+      "confirm_no": " No",
+      "options": [
+        {
+          "label": {
+            "text": "Lock",
+            "icon": ""
+          },
+          "command": "betterlockscreen -l",
+          "require_confirm": false
+        },
+        {
+          "label": {
+            "text": "Logout",
+            "icon": ""
+          },
+          "command": "kill -9 -1",
+          "require_confirm": true
+        },
+        {
+          "label": {
+            "text": "Suspend",
+            "icon": ""
+          },
+          "command": "systemctl suspend",
+          "require_confirm": true,
+          "pre_commands": [
+            "mpc -q pause",
+            "amixer set Master mute"
+          ]
+        },
+        {
+          "label": {
+            "text": "Hibernate",
+            "icon": ""
+          },
+          "command": "systemctl hibernate",
+          "require_confirm": true
+        },
+        {
+          "label": {
+            "text": "Reboot",
+            "icon": ""
+          },
+          "command": "systemctl reboot",
+          "require_confirm": true
+        },
+        {
+          "label": {
+            "text": "Shutdown",
+            "icon": ""
+          },
+          "command": "systemctl poweroff",
+          "require_confirm": true
+        }
+      ]
+    },
+    "volume": {
+      "prompt": {
+        "message": "Volume",
+        "icon": ""
+      },
+      "message": "Speaker: $(amixer get Master | tail -n1 | awk -F ' ' '{print $5}' | tr -d '[]'), Mic: $(amixer get Capture | tail -n1 | awk -F ' ' '{print $5}' | tr -d '[]')",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "400px"
+        },
+        "horizontal": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "120px"
+        },
+        "bordered": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "520px"
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Increase",
+            "icon": ""
+          },
+          "command": "amixer -Mq set Master,0 5%+ unmute"
+        },
+        {
+          "label": {
+            "text": "$(amixer get Master | grep -q '\\[on\\]' && echo 'Unmute' || echo 'Mute')",
+            "icon": "$(amixer get Master | grep -q '\\[on\\]' && echo '' || echo '')"
+          },
+          "command": "amixer set Master toggle",
+          "urgent_check": "amixer get Master 2>/dev/null | grep -q '\\[on\\]'"
+        },
+        {
+          "label": {
+            "text": "Decrease",
+            "icon": ""
+          },
+          "command": "amixer -Mq set Master,0 5%- unmute"
+        },
+        {
+          "label": {
+            "text": "$(amixer get Capture | grep -q '\\[on\\]' && echo 'Unmute' || echo 'Mute')",
+            "icon": "$(amixer get Capture | grep -q '\\[on\\]' && echo '' || echo '')"
+          },
+          "command": "amixer set Capture toggle",
+          "urgent_check": "amixer get Capture 2>/dev/null | grep -q '\\[on\\]'"
+        },
+        {
+          "label": {
+            "text": "Settings",
+            "icon": ""
+          },
+          "command": "pavucontrol"
+        }
+      ]
+    },
+    "battery": {
+      "prompt": {
+        "message": "$(acpi -b | cut -d',' -f1 | cut -d':' -f2 | tr -d ' ')",
+        "icon": "$(acpi -b | grep -q 'Charging' && echo '' || echo '')"
+      },
+      "message": "$(acpi -b | cut -d',' -f1 | cut -d':' -f1): $(acpi -b | cut -d',' -f2 | tr -d ' ',\\%),$(acpi -b | cut -d',' -f3)",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "400px"
+        },
+        "horizontal": {
+          "list_col": 4,
+          "list_row": 1,
+          "win_width": "550px"
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "120px"
+        },
+        "bordered": {
+          "list_col": 4,
+          "list_row": 1,
+          "win_width": "550px"
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "500px"
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Remaining",
+            "icon": ""
+          },
+          "command": "notify-send -u low \"Battery: $(acpi -b | cut -d',' -f2 | tr -d ' ',\\%)\""
+        },
+        {
+          "label": {
+            "text": "Status",
+            "icon": ""
+          },
+          "command": "notify-send -u low \"Status: $(acpi -b | cut -d',' -f1 | cut -d':' -f2 | tr -d ' ')\""
+        },
+        {
+          "label": {
+            "text": "Power Manager",
+            "icon": ""
+          },
+          "command": "xfce4-power-manager-settings"
+        },
+        {
+          "label": {
+            "text": "Diagnose",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY alacritty -e powertop"
+        }
+      ]
+    },
+    "brightness": {
+      "prompt": {
+        "message": "Brightness",
+        "icon": ""
+      },
+      "message": "Device: $(light -L | grep 'backlight' | head -n1 | cut -d'/' -f3)",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "400px"
+        },
+        "horizontal": {
+          "list_col": 4,
+          "list_row": 1,
+          "win_width": "550px"
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "120px"
+        },
+        "bordered": {
+          "list_col": 4,
+          "list_row": 1,
+          "win_width": "550px"
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 4,
+          "win_width": "425px"
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Increase",
+            "icon": ""
+          },
+          "command": "light -A 5"
+        },
+        {
+          "label": {
+            "text": "Optimal",
+            "icon": ""
+          },
+          "command": "light -S 25"
+        },
+        {
+          "label": {
+            "text": "Decrease",
+            "icon": ""
+          },
+          "command": "light -U 5"
+        },
+        {
+          "label": {
+            "text": "Settings",
+            "icon": ""
+          },
+          "command": "xfce4-power-manager-settings"
+        }
+      ]
+    },
+    "screenshot": {
+      "prompt": {
+        "message": "Screenshot",
+        "icon": ""
+      },
+      "message": "DIR: $(xdg-user-dir PICTURES)/Screenshots",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "400px"
+        },
+        "horizontal": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "120px"
+        },
+        "bordered": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "520px"
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Capture Desktop",
+            "icon": ""
+          },
+          "command": "maim -u -f png | xclip -selection clipboard -t image/png && notify-send -u low --replace=699 \"Screenshot Saved\""
+        },
+        {
+          "label": {
+            "text": "Capture Area",
+            "icon": ""
+          },
+          "command": "maim -u -f png -s -b 2 -c 0.35,0.55,0.85,0.25 -l | xclip -selection clipboard -t image/png && notify-send -u low --replace=699 \"Screenshot Saved\""
+        },
+        {
+          "label": {
+            "text": "Capture Window",
+            "icon": ""
+          },
+          "command": "maim -u -f png -i $(xdotool getactivewindow) | xclip -selection clipboard -t image/png && notify-send -u low --replace=699 \"Screenshot Saved\""
+        },
+        {
+          "label": {
+            "text": "Capture in 5s",
+            "icon": ""
+          },
+          "command": "sleep 5 && maim -u -f png | xclip -selection clipboard -t image/png && notify-send -u low --replace=699 \"Screenshot Saved\""
+        },
+        {
+          "label": {
+            "text": "Capture in 10s",
+            "icon": ""
+          },
+          "command": "sleep 10 && maim -u -f png | xclip -selection clipboard -t image/png && notify-send -u low --replace=699 \"Screenshot Saved\""
+        }
+      ]
+    },
+    "quicklinks": {
+      "prompt": {
+        "message": "Quick Links",
+        "icon": ""
+      },
+      "message": "Using '$BROWSER' as web browser",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "horizontal": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "bordered": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 6
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "Google",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://www.google.com/'"
+        },
+        {
+          "label": {
+            "text": "Gmail",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://mail.google.com/'"
+        },
+        {
+          "label": {
+            "text": "Youtube",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://www.youtube.com/'"
+        },
+        {
+          "label": {
+            "text": "Github",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://www.github.com/'"
+        },
+        {
+          "label": {
+            "text": "Reddit",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://www.reddit.com/'"
+        },
+        {
+          "label": {
+            "text": "Twitter",
+            "icon": ""
+          },
+          "command": "xdg-open 'https://www.twitter.com/'"
+        }
+      ]
+    },
+    "mpd": {
+      "prompt": {
+        "message": "$(mpc -f \"%artist%\" current 2>/dev/null || echo 'Offline')",
+        "icon": ""
+      },
+      "message": "$(mpc status 2>/dev/null | head -1 || echo 'MPD is Offline')",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "horizontal": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 6
+        },
+        "bordered": {
+          "list_col": 6,
+          "list_row": 1
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 6
+        }
+      },
+      "options": [
+        {
+          "label": {
+            "text": "$(mpc status | grep -q '\\[playing\\]' && echo 'Pause' || echo 'Play')",
+            "icon": "$(mpc status | grep -q '\\[playing\\]' && echo '' || echo '')"
+          },
+          "command": "mpc -q toggle"
+        },
+        {
+          "label": {
+            "text": "Stop",
+            "icon": ""
+          },
+          "command": "mpc -q stop"
+        },
+        {
+          "label": {
+            "text": "Previous",
+            "icon": ""
+          },
+          "command": "mpc -q prev"
+        },
+        {
+          "label": {
+            "text": "Next",
+            "icon": ""
+          },
+          "command": "mpc -q next"
+        },
+        {
+          "label": {
+            "text": "Repeat",
+            "icon": ""
+          },
+          "command": "mpc -q repeat",
+          "active_check": "mpc status 2>/dev/null | grep -q 'repeat: on'"
+        },
+        {
+          "label": {
+            "text": "Random",
+            "icon": ""
+          },
+          "command": "mpc -q random",
+          "active_check": "mpc status 2>/dev/null | grep -q 'random: on'"
+        }
+      ]
+    },
+    "appasroot": {
+      "prompt": {
+        "message": "Applications",
+        "icon": ""
+      },
+      "message": "Run Applications as Root",
+      "layout_overrides": {
+        "rounded": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "400px"
+        },
+        "horizontal": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "compact": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "120px"
+        },
+        "bordered": {
+          "list_col": 5,
+          "list_row": 1,
+          "win_width": "670px"
+        },
+        "iconic": {
+          "list_col": 1,
+          "list_row": 5,
+          "win_width": "520px"
+        }
+      },
+      "polkit_prefix": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY",
+      "options": [
+        {
+          "label": {
+            "text": "Alacritty",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY alacritty"
+        },
+        {
+          "label": {
+            "text": "Thunar",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY dbus-run-session thunar"
+        },
+        {
+          "label": {
+            "text": "Geany",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY geany"
+        },
+        {
+          "label": {
+            "text": "Ranger",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY alacritty -e ranger"
+        },
+        {
+          "label": {
+            "text": "Vim",
+            "icon": ""
+          },
+          "command": "pkexec env PATH=$PATH DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY alacritty -e vim"
+        }
+      ]
+    }
+  }
+}

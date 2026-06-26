@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Adapta
+ */
+
+* {
+    background:     #222D32FF;
+    background-alt: #2D383DFF;
+    foreground:     #CFD6D6FF;
+    selected:       #00BCD4FF;
+    active:         #00E676FF;
+    urgent:         #FF5252FF;
+}

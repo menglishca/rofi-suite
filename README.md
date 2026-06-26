@@ -1,525 +1,292 @@
-<!-- A huge collection of Rofi themes -->
+# Rofi Suite
 
-<p align="center">
-  <img src="previews/logo.png">
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/github/license/adi1090x/rofi?style=for-the-badge">
-  <img src="https://img.shields.io/github/stars/adi1090x/rofi?style=for-the-badge">
-  <img src="https://img.shields.io/github/issues/adi1090x/rofi?color=violet&style=for-the-badge">
-  <img src="https://img.shields.io/github/forks/adi1090x/rofi?color=teal&style=for-the-badge">
-</p>
-
-<p align="center">
-  <a href="https://github.com/adi1090x/rofi#launchers" target="_blank"><img alt="undefined" src="https://img.shields.io/badge/launchers-skyblue?style=for-the-badge"></a>
-  <a href="https://github.com/adi1090x/rofi#applets" target="_blank"><img alt="undefined" src="https://img.shields.io/badge/applets-lightgreen?style=for-the-badge"></a>
-  <a href="https://github.com/adi1090x/rofi#powermenus" target="_blank"><img alt="undefined" src="https://img.shields.io/badge/powermenus-pink?style=for-the-badge"></a>
-</p>
-
-<p align="center">A huge collection of <a href="https://github.com/davatorium/rofi">Rofi</a> based custom <i>Applets</i>, <i>Launchers</i> & <i>Powermenus</i>.</p>
-
-<details>
-<summary><b><code>Launchers</code></b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|
-|--|--|--|--|
-|![img](previews/launchers/type-1.gif)|![img](previews/launchers/type-2.gif)|![img](previews/launchers/type-3.gif)|![img](previews/launchers/type-4.gif)|
-
-|Type 5|Type 6|Type 7|
-|--|--|--|
-|![img](previews/launchers/type-5.gif)|![img](previews/launchers/type-6.gif)|![img](previews/launchers/type-7.gif)|
-
-</details>
-
-<details>
-<summary><b><code>Applets</code></b></summary>
-
-|Type 1|Type 2|Type 3|
-|--|--|--|
-|![img](previews/applets/type-1.gif)|![img](previews/applets/type-2.gif)|![img](previews/applets/type-3.gif)|
-
-|Type 4|Type 5|
-|--|--|
-|![img](previews/applets/type-4.gif)|![img](previews/applets/type-5.gif)|
-
-</details>
-
-<details>
-<summary><b><code>Powermenus</code></b></summary>
-
-|Type 1|Type 2|Type 3|
-|--|--|--|
-|![img](previews/powermenu/type-1.gif)|![img](previews/powermenu/type-2.gif)|![img](previews/powermenu/type-3.gif)|
-
-|Type 4|Type 5|Type 6|
-|--|--|--|
-|![img](previews/powermenu/type-4.gif)|![img](previews/powermenu/type-5.gif)|![img](previews/powermenu/type-6.gif)|
-
-</details>
-
-## What is Rofi?
-
-[Rofi](https://github.com/davatorium/rofi) is A window switcher, Application launcher and dmenu replacement. Rofi started as a clone of simpleswitcher and It has been extended with extra features, like an application launcher and ssh-launcher, and can act as a drop-in dmenu replacement, making it a very versatile tool. Rofi, like dmenu, will provide the user with a textual list of options where one or more can be selected. This can either be running an application, selecting a window, or options provided by an external script.
-
-## Installation
-
-> **Everything here is created on rofi version : `1.7.4`**
-
-* First, Make sure you have the same (stable) version of rofi installed.
-  - On Arch / Arch-based : **`sudo pacman -S rofi`**
-  - On Debian / Ubuntu : **`sudo apt-get install rofi`**
-  - On Fedora : **`sudo dnf install rofi`**
-
-- Then, Clone this repository -
-```
-$ git clone --depth=1 https://github.com/adi1090x/rofi.git
-```
-
-- Change to cloned directory and make `setup.sh` executable -
-```
-$ cd rofi
-$ chmod +x setup.sh
-```
-
-- Run `setup.sh` to install the configs -
-```
-$ ./setup.sh
-
-[*] Installing fonts...
-[*] Updating font cache...
-
-[*] Creating a backup of your rofi configs...
-[*] Installing rofi configs...
-[*] Successfully Installed.
-```
-
-- That's it, These themes are now installed on your system.
-
-> **Note** : These themes are like an ecosystem, everything here is connected with each other in some way. So... before modifying anything by your own, make sure you know what you doing.
+A clean, DRY, and NixOS-friendly architecture for rofi themes and applets.
 
 ---
 
-<p align="center">
-  <a href="https://github.com/sponsors/adi1090x"><img src="previews/sponsor.png" width="256px"></a>
-</p>
+## Overview
 
-<p align="center">
-  <b>Special thanks to all the Sponsors</b>. Maintenance of this project is made possible by you guys. If you'd like to sponsor this project and have your avatar appear below, <a href="https://github.com/sponsors/adi1090x">click here</a> 💖
-</p>
-
-<p align="center">
-  <!-- sponsors --><a href="https://github.com/davidtoska"><img src="https:&#x2F;&#x2F;github.com&#x2F;davidtoska.png" width="60px" alt="User avatar: David Toska" /></a><a href="https://github.com/dgxlab"><img src="https:&#x2F;&#x2F;github.com&#x2F;dgxlab.png" width="60px" alt="User avatar: David Vargas" /></a><a href="https://github.com/maksimdymov"><img src="https:&#x2F;&#x2F;github.com&#x2F;maksimdymov.png" width="60px" alt="User avatar: Maksim" /></a><!-- sponsors -->
-</p>
+This repository provides a modular system for customizing [rofi](https://github.com/davatorium/rofi) — a window switcher, application launcher, and dmenu replacement. It separates **structure** (layout), **styling** (visual details), and **colors** (design tokens) to eliminate duplication and enable easy customization.
 
 ---
 
-## Launchers
+## Conceptual Model
 
-**`Change Style` :** Edit `~/.config/rofi/launchers/type-X/launcher.sh` script and edit the following line to use the style you like.
+Think of rofi theming like CSS:
+
+| Rofi Concept     | CSS Analogy                                 | What It Controls                                                                                  |
+|------------------|---------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **Type**         | Layout system (flexbox vs grid)             | Widget tree structure, children ordering, layout direction                                        |
+| **Style**        | Component variants (padding, border-radius) | Spacing, borders, sizing, fine-grained visual tweaks                                              |
+| **Color Scheme** | Design tokens / CSS custom properties       | 5-6 color variables: `background`, `foreground`, `selected`, `active`, `urgent`, `background-alt` |
+
+### Types
+
+A **Type** defines the structural layout of the rofi window:
+
+- **rounded**: Centered modal with **rounded corners** (border-radius: 20px), spacious 40px padding, 2-column list, full widget set including message and mode-switcher
+- **horizontal**: **Horizontal list** layout (6 columns × 1 row), 900px wide, listview appears before inputbar, suitable for wide launchers
+- **compact**: **Narrow** (400px) and minimal — no message or mode-switcher, zero-spacing inputbar, no placeholder text
+- **bordered**: Clean layout with a **visible 1px border** around the window, 600px wide, full widget set
+- **iconic**: **Icon mode enabled** (show-icons: true), no message or mode-switcher, 12-line tall list, 800px wide
+
+Each type is a complete `.rasi` file that:
+- Imports shared element definitions
+- Imports a color scheme
+- Defines `window`, `mainbox`, `inputbar`, `listview` properties
+- Specifies the `children` array for `mainbox`
+
+### Styles
+
+A **Style** is a set of visual overrides that can be applied on top of a Type:
+
+- Padding and spacing values
+- Border width and radius
+- Background colors for specific widgets
+- Element icon size
+
+### Color Schemes
+
+A **Color Scheme** defines exactly 6 color variables used throughout:
+
+```rasi
+* {
+    background:     #2E3440FF;  /* main background */
+    background-alt: #383E4AFF;  /* alternate/inputbar */
+    foreground:     #E5E9F0FF;  /* text color */
+    selected:       #81A1C1FF;  /* selected item */
+    active:         #A3BE8CFF;  /* active/urgent-like */
+    urgent:         #BF616AFF;  /* urgent state */
+}
 ```
-theme='style-1'
-```
 
-**`Change Colors` :** Edit `~/.config/rofi/launchers/type-X/shared/colors.rasi` file and edit the following line to use the color-scheme you like.
-```css
-@import "~/.config/rofi/colors/onedark.rasi"
-```
-
-> Colors in `type-5`, `type-6` and `type-7` are hard-coded (based on image colors) and can be changed by editing the respective **`style-X.rasi`** file.
-
-#### Previews
-
-<details>
-<summary><b>Type 1</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-1/1.png)|![img](previews/launchers/type-1/2.png)|![img](previews/launchers/type-1/3.png)|![img](previews/launchers/type-1/4.png)|![img](previews/launchers/type-1/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-1/6.png)|![img](previews/launchers/type-1/7.png)|![img](previews/launchers/type-1/8.png)|![img](previews/launchers/type-1/9.png)|![img](previews/launchers/type-1/10.png)|
-
-|Style 11|Style 12|Style 13|Style 14|Style 15|
-|--|--|--|--|--|
-|![img](previews/launchers/type-1/11.png)|![img](previews/launchers/type-1/12.png)|![img](previews/launchers/type-1/13.png)|![img](previews/launchers/type-1/14.png)|![img](previews/launchers/type-1/15.png)|
-
-</details>
-
-<details>
-<summary><b>Type 2</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-2/1.png)|![img](previews/launchers/type-2/2.png)|![img](previews/launchers/type-2/3.png)|![img](previews/launchers/type-2/4.png)|![img](previews/launchers/type-2/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-2/6.png)|![img](previews/launchers/type-2/7.png)|![img](previews/launchers/type-2/8.png)|![img](previews/launchers/type-2/9.png)|![img](previews/launchers/type-2/10.png)|
-
-|Style 11|Style 12|Style 13|Style 14|Style 15|
-|--|--|--|--|--|
-|![img](previews/launchers/type-2/11.png)|![img](previews/launchers/type-2/12.png)|![img](previews/launchers/type-2/13.png)|![img](previews/launchers/type-2/14.png)|![img](previews/launchers/type-2/15.png)|
-
-</details>
-
-<details>
-<summary><b>Type 3</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-3/1.png)|![img](previews/launchers/type-3/2.png)|![img](previews/launchers/type-3/3.png)|![img](previews/launchers/type-3/4.png)|![img](previews/launchers/type-3/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-3/6.png)|![img](previews/launchers/type-3/7.png)|![img](previews/launchers/type-3/8.png)|![img](previews/launchers/type-3/9.png)|![img](previews/launchers/type-3/10.png)|
-
-</details>
-
-<details>
-<summary><b>Type 4</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-4/1.png)|![img](previews/launchers/type-4/2.png)|![img](previews/launchers/type-4/3.png)|![img](previews/launchers/type-4/4.png)|![img](previews/launchers/type-4/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-4/6.png)|![img](previews/launchers/type-4/7.png)|![img](previews/launchers/type-4/8.png)|![img](previews/launchers/type-4/9.png)|![img](previews/launchers/type-4/10.png)|
-
-</details>
-
-<details>
-<summary><b>Type 5</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-5/1.png)|![img](previews/launchers/type-5/2.png)|![img](previews/launchers/type-5/3.png)|![img](previews/launchers/type-5/4.png)|![img](previews/launchers/type-5/5.png)|
-
-</details>
-
-<details>
-<summary><b>Type 6</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-6/1.png)|![img](previews/launchers/type-6/2.png)|![img](previews/launchers/type-6/3.png)|![img](previews/launchers/type-6/4.png)|![img](previews/launchers/type-6/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-6/6.png)|![img](previews/launchers/type-6/7.png)|![img](previews/launchers/type-6/8.png)|![img](previews/launchers/type-6/9.png)|![img](previews/launchers/type-6/10.png)|
-
-</details>
-
-<details>
-<summary><b>Type 7</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/launchers/type-7/1.png)|![img](previews/launchers/type-7/2.png)|![img](previews/launchers/type-7/3.png)|![img](previews/launchers/type-7/4.png)|![img](previews/launchers/type-7/5.png)|
-
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/launchers/type-7/6.png)|![img](previews/launchers/type-7/7.png)|![img](previews/launchers/type-7/8.png)|![img](previews/launchers/type-7/9.png)|![img](previews/launchers/type-7/10.png)|
-
-</details>
+Color schemes live in `templates/colors/` as standalone `.rasi` files. They can be:
+- Static: pre-defined palettes (nord, dracula, catppuccin, etc.)
+- Dynamic: generated by Stylix from your NixOS config
 
 ---
 
-<details>
-<summary><b>Color Schemes</b></summary>
+## Configuration
 
-|Adapta|Arc|Black|Catppuccin|Cyberpunk|
-|--|--|--|--|--|
-|![img](previews/launchers/colors/color-1.png)|![img](previews/launchers/colors/color-2.png)|![img](previews/launchers/colors/color-3.png)|![img](previews/launchers/colors/color-4.png)|![img](previews/launchers/colors/color-5.png)|
+### Two-file system
 
-|Dracula|Everforest|Gruvbox|Lovelace|Navy|
-|--|--|--|--|--|
-|![img](previews/launchers/colors/color-6.png)|![img](previews/launchers/colors/color-7.png)|![img](previews/launchers/colors/color-8.png)|![img](previews/launchers/colors/color-9.png)|![img](previews/launchers/colors/color-10.png)|
+The configuration is split across two files that are deep-merged at runtime:
 
-|Nord|Onedark|Paper|Solarized|Yousai|
-|--|--|--|--|--|
-|![img](previews/launchers/colors/color-11.png)|![img](previews/launchers/colors/color-12.png)|![img](previews/launchers/colors/color-13.png)|![img](previews/launchers/colors/color-14.png)|![img](previews/launchers/colors/color-15.png)|
+| File               | Purpose                                                    |
+|--------------------|------------------------------------------------------------|
+| `defaults.json`    | Shipped defaults — all applets, commands, theme settings   |
+| `user_config.json` | Your personal overrides — only the keys you want to change |
 
-</details>
+**How merging works:** Every key in `user_config.json` overrides the corresponding key in `defaults.json`. Nested objects are merged recursively (you only need to specify the exact leaf values you want to change). Arrays are replaced wholesale when present in your overrides.
 
-## Applets
+### `defaults.json` (reference)
 
-|Applets|Description|Required Applications|
-|:-|:-|:-|
-|**`Apps As Root`**|Open Applications as root|`pkexec` : `alacritty`, `thunar`, `geany`, `ranger`, `vim`|
-|**`Apps`**|Favorite or most used Applications|`alacritty`, `thunar`, `geany`, `firefox`, `ncmpcpp`, `xfce4-settings-manager`|
-|**`Battery`**|Display battery percentage & charging status with dynamic icons|`pkexec`, `acpi`, `powertop` `xfce4-power-manager-settings`|
-|**`Brightness`**|Display and adjust screen brightness|`light`, `xfce4-power-manager-settings`|
-|**`MPD`**|Control the song play through **`mpd`**|`mpd`, `mpc`|
-|**`Powermenu`**|A classic power menu, with Uptime|`systemd`, `betterlockscreen`|
-|**`Quicklinks`**|Bookmarks for most used websites|`firefox` or `chromium` or any other browser|
-|**`Screenshot`**|Take screenshots using **`maim`**|`maim`, `xrandr`, `dunst`, `xclip`|
-|**`Volume`**|Display and control volume with dynamic icons and mute status|`amixer` and `pavucontrol`|
+The full structure with all default applets is in [`defaults.json`](defaults.json). Key sections:
 
-> To use your programs with these applets, Edit the scripts in `~/.config/rofi/applets/bin` directory.
+- **`theme`** — Type, color scheme, and style overrides
+- **`applets.*`** — Each applet has `prompt` (object with `message` + `icon`), `message`, `options[]`, `layout_overrides`, and optional fields like `confirm_*`. Options can carry `urgent_check` or `active_check` to dynamically highlight items based on live system state (e.g. mute status, repeat mode).
 
-**`Change Theme` :** Edit `~/.config/rofi/applets/shared/theme.bash` script and edit the following line to use the type and style you like.
-```ini
-type="$HOME/.config/rofi/applets/type-1"
-style='style-1.rasi'
+### `user_config.json` (your overrides)
+
+To customize, create or edit [`user_config.json`](user_config.json). You only need to include the keys you want to change. Example:
+
+```json
+{
+  "theme": {
+    "type": "rounded",
+    "color_scheme": "catppuccin"
+  },
+  "applets": {
+    "apps": {
+      "prompt": {
+        "message": "My Apps",
+        "icon": ""
+      },
+      "options": [
+        { "label": { "text": "Kitty", "icon": "" }, "command": "kitty" }
+      ]
+    },
+    "powermenu": {
+      "options": [
+        { "label": { "text": "Shutdown", "icon": "" }, "command": "systemctl poweroff", "require_confirm": true }
+      ]
+    }
+  }
+}
 ```
 
-**`Change Colors` :** Edit `~/.config/rofi/applets/shared/colors.rasi` file and edit the following line to use the color-scheme you like.
-```css
-@import "~/.config/rofi/colors/onedark.rasi"
+Since deep merging is recursive, you only need to specify the exact leaf values. For example, changing just the `color_scheme` inside `theme` doesn't require re-specifying `type` or `style_overrides`.
+
+### Applet Definitions
+
+Each applet is defined under `applets.*` in the configuration:
+
+- **`prompt`**: An object `{ "message": "...", "icon": "..." }` — the rofi prompt text and its icon
+- **`message`**: Status message shown below the prompt (rofi's `-mesg`)
+- **`options`**: Array of menu items `{ "label": { "text": "Terminal", "icon": "" }, "command": "alacritty" }`
+- **`layout_overrides`**: Per-type column/row/width overrides
+- **`confirm_*`**: Confirmation dialog fields (for powermenu-style actions)
+- **`urgent_check`** / **`active_check`** (on options): Shell commands evaluated at runtime — when they exit 0, the matching option is highlighted with rofi's urgent or active styling, showing live state like "is audio muted?" or "is repeat on?"
+
+`rofi-menu.sh` reads these from the merged config and builds the menu dynamically.
+
+---
+
+## Building
+
+### Build-time generation
+
+```bash
+./build-theme.sh
 ```
 
-> Colors in `type-4` and `type-5` are hard-coded (based on image colors) and can be changed by editing the respective **`style-X.rasi`** file.
+This reads the merged config (`defaults.json` + `user_config.json`), composes templates, applies overrides, and writes to `output/`:
 
-#### Previews
-
-<details>
-<summary><b>Apps as root</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/1/1.png)|![img](previews/applets/1/2.png)|![img](previews/applets/1/3.png)|![img](previews/applets/1/4.png)|![img](previews/applets/1/5.png)|
-
-</details>
-
-<details>
-<summary><b>Apps</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/2/1.png)|![img](previews/applets/2/2.png)|![img](previews/applets/2/3.png)|![img](previews/applets/2/4.png)|![img](previews/applets/2/5.png)|
-
-</details>
-
-<details>
-<summary><b>Battery</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/3/1.png)|![img](previews/applets/3/2.png)|![img](previews/applets/3/3.png)|![img](previews/applets/3/4.png)|![img](previews/applets/3/5.png)|
-
-</details>
-
-<details>
-<summary><b>Brightness</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/4/1.png)|![img](previews/applets/4/2.png)|![img](previews/applets/4/3.png)|![img](previews/applets/4/4.png)|![img](previews/applets/4/5.png)|
-
-</details>
-
-<details>
-<summary><b>MPD</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/5/1.png)|![img](previews/applets/5/2.png)|![img](previews/applets/5/3.png)|![img](previews/applets/5/4.png)|![img](previews/applets/5/5.png)|
-
-</details>
-
-<details>
-<summary><b>Powermenu</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/6/1.png)|![img](previews/applets/6/2.png)|![img](previews/applets/6/3.png)|![img](previews/applets/6/4.png)|![img](previews/applets/6/5.png)|
-
-</details>
-
-<details>
-<summary><b>Quicklinks</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/7/1.png)|![img](previews/applets/7/2.png)|![img](previews/applets/7/3.png)|![img](previews/applets/7/4.png)|![img](previews/applets/7/5.png)|
-
-</details>
-
-<details>
-<summary><b>Screenshot</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/8/1.png)|![img](previews/applets/8/2.png)|![img](previews/applets/8/3.png)|![img](previews/applets/8/4.png)|![img](previews/applets/8/5.png)|
-
-</details>
-
-<details>
-<summary><b>Volume</b></summary>
-
-|Type 1|Type 2|Type 3|Type 4|Type 5|
-|--|--|--|--|--|
-|![img](previews/applets/9/1.png)|![img](previews/applets/9/2.png)|![img](previews/applets/9/3.png)|![img](previews/applets/9/4.png)|![img](previews/applets/9/5.png)|
-
-</details>
-
-## Powermenus
-
-**`Change Style` :** Edit `~/.config/rofi/powermenu/type-X/powermenu.sh` script and edit the following line to use the style you like.
 ```
-theme='style-1'
+output/
+└── styles/
+    └── bordered.rasi       # assembled theme (templates + color scheme inlined)
 ```
 
-**`Change Colors` :** Edit `~/.config/rofi/powermenu/type-X/shared/colors.rasi` file and edit the following line to use the color-scheme you like.
-```css
-@import "~/.config/rofi/colors/onedark.rasi"
+To use the built theme:
+
+```bash
+mkdir -p ~/.config/rofi/suite
+cp output/styles/bordered.rasi ~/.config/rofi/suite/theme.rasi
+cp defaults.json ~/.config/rofi/suite/
+cp user_config.json ~/.config/rofi/suite/  # optional
 ```
 
-> Colors in `type-5` and `type-6` are hard-coded (based on image colors) and can be changed by editing the respective **`style-X.rasi`** file.
+### Runtime (no build)
 
-#### Previews
+Just use the `bin/` scripts directly:
 
-<details>
-<summary><b>Type 1</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-1/1.png)|![img](previews/powermenu/type-1/2.png)|![img](previews/powermenu/type-1/3.png)|![img](previews/powermenu/type-1/4.png)|![img](previews/powermenu/type-1/5.png)|
-
-</details>
-
-<details>
-<summary><b>Type 2</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-2/1.png)|![img](previews/powermenu/type-2/2.png)|![img](previews/powermenu/type-2/3.png)|![img](previews/powermenu/type-2/4.png)|![img](previews/powermenu/type-2/5.png)|
-
-|Style 6|Style 7|Style 8|Style 9|Style 10|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-2/6.png)|![img](previews/powermenu/type-2/7.png)|![img](previews/powermenu/type-2/8.png)|![img](previews/powermenu/type-2/9.png)|![img](previews/powermenu/type-2/10.png)|
-
-</details>
-
-<details>
-<summary><b>Type 3</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-3/1.png)|![img](previews/powermenu/type-3/2.png)|![img](previews/powermenu/type-3/3.png)|![img](previews/powermenu/type-3/4.png)|![img](previews/powermenu/type-3/5.png)|
-
-</details>
-
-<details>
-<summary><b>Type 4</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-4/1.png)|![img](previews/powermenu/type-4/2.png)|![img](previews/powermenu/type-4/3.png)|![img](previews/powermenu/type-4/4.png)|![img](previews/powermenu/type-4/5.png)|
-
-</details>
-
-<details>
-<summary><b>Type 5</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-5/1.png)|![img](previews/powermenu/type-5/2.png)|![img](previews/powermenu/type-5/3.png)|![img](previews/powermenu/type-5/4.png)|![img](previews/powermenu/type-5/5.png)|
-
-</details>
-
-<details>
-<summary><b>Type 6</b></summary>
-
-|Style 1|Style 2|Style 3|Style 4|Style 5|
-|--|--|--|--|--|
-|![img](previews/powermenu/type-6/1.png)|![img](previews/powermenu/type-6/2.png)|![img](previews/powermenu/type-6/3.png)|![img](previews/powermenu/type-6/4.png)|![img](previews/powermenu/type-6/5.png)|
-
-</details>
-
-## Tips
-
-#### Simple way to execute scripts
-
-There's a `$HOME/.config/rofi/scripts` directory, which contains links to each script. you can execute these links to open any type of Launcher, Applet or Powermenu.
-
-You can add `$HOME/.config/rofi/scripts` directory to your `$PATH` variable so that entering `t7_launcher` in the terminal (or executing this command) will summon the ***type-7 launcher***. you can do it by -
-
-- In `bash`
-``` bash
-# Add directory to the $PATH variable
-echo "PATH=$PATH:~/.config/rofi/scripts" >> ~/.profile
+```bash
+bin/rofi-menu.sh apps
+bin/rofi-menu.sh powermenu
+bin/rofi-desktop.sh run
+bin/rofi-desktop.sh --theme ./path/to/theme.rasi filebrowser
 ```
 
-- In `zsh` (oh-my-zsh)
-``` zsh
-# Edit .zshrc and add this line
-export PATH=$HOME/.config/rofi/scripts:$PATH
-```
+Both scripts share the same config directory (`~/.config/rofi/suite/`), looking for `defaults.json`, `user_config.json`, and `theme.rasi`. `rofi-menu.sh` requires `jq`.
 
-> **Warning:** After changing the shell files, Logout and Login back again to update the `$PATH` environment variable.
+---
 
 ## Usage
 
-#### with polybar
+### Standalone (non-Nix)
 
-You can use these `launchers`, `powermenus` or `applets` with polybar by simply adding a **module** like that:
+1. Clone the repo
+2. Edit `user_config.json` with your overrides (or edit `defaults.json` directly if you prefer)
+3. Run `./build-theme.sh`
+4. Copy the built theme to `~/.config/rofi/suite/`:
 
-```ini
-;; Application Launcher Module
-[module/launcher]
-type = custom/text
+   ```bash
+   mkdir -p ~/.config/rofi/suite
+   cp output/styles/bordered.rasi ~/.config/rofi/suite/theme.rasi
+   cp defaults.json ~/.config/rofi/suite/
+   cp user_config.json ~/.config/rofi/suite/  # optional
+   ```
 
-content = 異
-content-background = black
-content-foreground = green
+5. Run launchers:
 
-click-left = ~/.config/rofi/launchers/type-1/launcher.sh
-click-right = launcher_t1
+   ```bash
+   ~/.config/rofi/bin/rofi-desktop.sh run
+   ~/.config/rofi/bin/rofi-menu.sh apps
+   ```
 
-;; Power Menu Module
-[module/powermenu]
-type = custom/text
+Both scripts resolve config files from the same `~/.config/rofi/suite/` directory:
+- `defaults.json` → shipped defaults (required)
+- `user_config.json` → personal overrides (optional)
+- `theme.rasi` → pre-built theme (shared by both scripts)
 
-content = 襤
-content-background = black
-content-foreground = red
+You can override any file via `--defaults`, `--config`, or `--theme` flags.
 
-click-left = ~/.config/rofi/powermenu/type-1/powermenu.sh
-click-right = powermenu_t1
+### With NixOS / Home Manager (flake)
+
+This repo provides a Nix flake with a Home Manager module for [Stylix](https://github.com/danth/stylix) integration. **Nix is entirely optional** — the standalone instructions above work without it.
+
+#### 1. Add the flake input
+
+```nix
+# flake.nix
+{
+  inputs = {
+    rofi-suite = {
+      url = "github:anthropics/rofi-suite";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, rofi-suite, ... }: {
+    # ... your existing outputs
+  };
+}
 ```
 
-#### with i3wm
+#### 2. Enable the Home Manager module
 
-You can also use them with the `keybindings` on your **window manager**, For example:
+```nix
+# home.nix
+{
+  imports = [ rofi-suite.homeManagerModules.default ];
+
+  programs.rofi-suite = {
+    enable = true;
+    themeType = "rounded";              # rounded | horizontal | compact | bordered | iconic
+    useStylixColors = true;             # generate colors from your Stylix base16 palette
+    # colorScheme = "nord";             # used when useStylixColors = false
+
+    # Optional: override which base16 colors map to rofi variables
+    colorMapping = {
+      selected = "base0E";             # default: base0D (blue)
+      urgent   = "base09";             # default: base08 (red)
+    };
+
+    # Optional: style overrides
+    styleOverrides = {
+      border-radius = "10px";
+    };
+
+    # Optional: applet overrides
+    extraConfig = {
+      apps = {
+        prompt.message = "My Apps";
+      };
+    };
+  };
+}
+```
+
+#### 3. Build and deploy
 
 ```bash
-set $mod Mod4
-
-bindsym $mod+p exec --no-startup-id ~/.config/rofi/launchers/type-2/launcher.sh
-bindsym $mod+x exec --no-startup-id powermenu_t2
+home-manager switch
 ```
 
-#### with Openbox
+The module will:
+1. Read your Stylix base16 palette from `config.lib.stylix.colors`
+2. Generate `stylix.rasi` with the mapped colors (injected at build time)
+3. Run `build-theme.sh` to assemble the final `theme.rasi`
+4. Deploy config to `~/.config/rofi/suite/`:
+   - `theme.rasi` — assembled theme (built from your palette)
+   - `defaults.json` — shipped defaults
+   - `user_config.json` — generated from your module options
+5. Deploy scripts to `~/.config/rofi/`:
+   - `bin/` — rofi-menu.sh, rofi-desktop.sh
 
-Same thing can be done with `openbox` by adding these lines to **`rc.xml`** file:
+Both scripts (`rofi-menu.sh`, `rofi-desktop.sh`) resolve config from `~/.config/rofi/suite/` as usual.
 
-```xml
-  <keyboard>
-    <keybind key="W-p">
-      <action name="Execute">
-        <command>launcher_t3</command>
-      </action>
-    </keybind>
-    <keybind key="W-x">
-      <action name="Execute">
-        <command>~/.config/rofi/powermenu/type-3/powermenu.sh</command>
-      </action>
-    </keybind>
-  </keyboard>
-```
+#### Base16 color mapping
 
-## FYI
+| Rofi Variable | Default base16 | Typical meaning |
+|---------------|---------------|-----------------|
+| `background` | `base00` | Default background |
+| `background-alt` | `base01` | Lighter background (inputbar, alternate rows) |
+| `foreground` | `base05` | Default text color |
+| `selected` | `base0D` | Selection highlight (typically blue) |
+| `active` | `base0B` | Active state (typically green) |
+| `urgent` | `base08` | Urgent state (typically red) |
 
-- For previous versions, check the respective branch, [1.7.0](https://github.com/adi1090x/rofi/tree/1.7.0) is the most recent branch.
-- These themes are created on a display with **1920x1080** resolution. Everything should work fine on your display as well, except fullscreen themes. So Adjust the **`margin`** and **`padding`** by yourself.
-- The purpose of this repository is to provide you a complete (almost) reference. So by using the files as reference, You can theme rofi by yourself.
+Override any mapping via the `colorMapping` option.
+

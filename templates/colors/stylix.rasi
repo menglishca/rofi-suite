@@ -1,0 +1,27 @@
+/**
+ * Stylix Color Scheme for Rofi
+ *
+ * This file is auto-generated when using the NixOS/Stylix integration.
+ * Do not edit manually — changes will be overwritten on system rebuild.
+ *
+ * To use this color scheme:
+ *   1. Set "color_scheme": "stylix" in your user_config.json or defaults.json
+ *   2. Enable the rofi-suite Home Manager module:
+ *        programs.rofi-suite = {
+ *          enable = true;
+ *          useStylixColors = true;
+ *        };
+ *   3. The module generates this file from your Stylix base16 palette
+ *
+ * Base16 Color Mapping (defaults — customizable via colorMapping option):
+ *   base00 → background     (default background)
+ *   base01 → background-alt (lighter background, inputbar, alternate rows)
+ *   base05 → foreground     (default text color)
+ *   base0D → selected       (selection highlight — typically blue)
+ *   base0B → active         (active state — typically green)
+ *   base08 → urgent         (urgent state — typically red)
+ *
+ * For non-Nix users: this file is a placeholder. Choose any color scheme
+ * from templates/colors/ (e.g., nord, dracula, catppuccin) or define
+ * your own following the 6-variable format above.
+ */

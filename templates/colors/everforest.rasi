@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Everforest
+ */
+
+* {
+    background:     #2B3339FF;
+    background-alt: #343F44FF;
+    foreground:     #D3C6AAFF;
+    selected:       #7FBBB3FF;
+    active:         #A7C080FF;
+    urgent:         #E67E80FF;
+}

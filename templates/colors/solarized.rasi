@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Solarized
+ */
+
+* {
+    background:     #002B36FF;
+    background-alt: #073642FF;
+    foreground:     #839496FF;
+    selected:       #268BD2FF;
+    active:         #859900FF;
+    urgent:         #DC322FFF;
+}

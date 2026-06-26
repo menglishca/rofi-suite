@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Onedark
+ */
+
+* {
+    background:     #282C34FF;
+    background-alt: #353B45FF;
+    foreground:     #ABB2BFFF;
+    selected:       #61AFEFFF;
+    active:         #98C379FF;
+    urgent:         #E06C75FF;
+}

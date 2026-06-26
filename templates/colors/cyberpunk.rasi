@@ -1,0 +1,15 @@
+/**
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ *
+ * Colors - Cyberpunk
+ */
+
+* {
+    background:     #0D0D0DFF;
+    background-alt: #1A1A2EFF;
+    foreground:     #E0E0E0FF;
+    selected:       #00FFFFFF;
+    active:         #00FF00FF;
+    urgent:         #FF00FFFF;
+}
