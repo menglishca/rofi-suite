@@ -61,8 +61,8 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --type)           THEME_TYPE="$2"; shift 2 ;;
-        --color)          COLOR_SCHEME="$2"; shift 2 ;;
+        --type)           THEME_TYPE="$2"; _CLI_TYPE_SET=1; shift 2 ;;
+        --color)          COLOR_SCHEME="$2"; _CLI_COLOR_SET=1; shift 2 ;;
         --output)         OUTPUT_DIR="$2"; shift 2 ;;
         --style)          STYLE_OVERRIDES="$2"; shift 2 ;;
         --templates-dir)  TEMPLATES_DIR="$2"; shift 2 ;;
@@ -91,12 +91,15 @@ else
     merged=$(cat "$DEFAULTS_FILE")
 fi
 
-THEME_TYPE=$(echo "$merged" | jq -re '.theme.type // empty' || echo "$THEME_TYPE")
-COLOR_SCHEME=$(echo "$merged" | jq -re '.theme.color_scheme // empty' || echo "$COLOR_SCHEME")
-
-# ── CLI args override config (already parsed above) ────────────
-# Note: --type and --color flags set THEME_TYPE/COLOR_SCHEME before
-# this point, so they take precedence over config values.
+# ── CLI args take precedence over config ───────────────────────
+# Save the CLI-parsed values (set during arg parsing above).
+# Only use config values when no CLI arg was provided.
+if [ -z "${_CLI_TYPE_SET:-}" ]; then
+    THEME_TYPE=$(echo "$merged" | jq -re '.theme.type // empty' || echo "$THEME_TYPE")
+fi
+if [ -z "${_CLI_COLOR_SET:-}" ]; then
+    COLOR_SCHEME=$(echo "$merged" | jq -re '.theme.color_scheme // empty' || echo "$COLOR_SCHEME")
+fi
 
 # ── Validate type ──────────────────────────────────────────────
 TYPE_FILE="$TEMPLATES_DIR/types/${THEME_TYPE}.rasi"
