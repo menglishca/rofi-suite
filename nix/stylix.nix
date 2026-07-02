@@ -9,6 +9,15 @@
 #       enable = true;
 #       themeType = "rounded";
 #       useStylixColors = true;  # default
+#
+#       # Per-launcher theme overrides
+#       desktopThemes = {
+#         drun.type = "horizontal";
+#         window.type = "compact";
+#       };
+#       appletThemes = {
+#         powermenu = { type = "rounded"; color_scheme = "dracula"; };
+#       };
 #     };
 #   }
 
@@ -69,19 +78,29 @@ let
     }
   '';
 
-  userConfig = {
-    theme = {
-      type = cfg.themeType;
-      color_scheme = if cfg.useStylixColors then "stylix" else cfg.colorScheme;
-    };
+  # ── Build user_config.json ────────────────────────────────────
+  baseTheme = {
+    type = cfg.themeType;
+    color_scheme = if cfg.useStylixColors then "stylix" else cfg.colorScheme;
   } // lib.optionalAttrs (cfg.styleOverrides != {}) {
-    theme = {
-      type = cfg.themeType;
-      color_scheme = if cfg.useStylixColors then "stylix" else cfg.colorScheme;
-      style_overrides = cfg.styleOverrides;
-    };
-  } // lib.optionalAttrs (cfg.extraConfig != {}) {
-    applets = cfg.extraConfig;
+    style_overrides = cfg.styleOverrides;
+  };
+
+  # Per-desktop-mode theme overrides: { drun = { type = "horizontal"; }; }
+  # Wraps each entry in { theme = { ... }; }
+  desktopConfig = lib.mapAttrs (_: opts: { theme = opts; }) cfg.desktopThemes;
+
+  # Per-applet theme overrides: { powermenu = { type = "rounded"; color_scheme = "dracula"; }; }
+  # Wraps each entry in { theme = { ... }; }
+  appletThemeConfig = lib.mapAttrs (_: opts: { theme = opts; }) cfg.appletThemes;
+
+  # Merge applet themes with extraConfig (extraConfig takes precedence)
+  appletOverrides = appletThemeConfig // cfg.extraConfig;
+
+  userConfig = lib.filterAttrs (_: v: v != {}) {
+    theme = baseTheme;
+    desktop = desktopConfig;
+    applets = appletOverrides;
   };
 
   userConfigJson = builtins.toJSON userConfig;
@@ -122,14 +141,14 @@ in {
     themeType = lib.mkOption {
       type = lib.types.enum [ "rounded" "horizontal" "compact" "bordered" "iconic" ];
       default = "bordered";
-      description = "The rofi theme type (layout).";
+      description = "The global default rofi theme type (layout).";
     };
 
     colorScheme = lib.mkOption {
       type = lib.types.str;
       default = "nord";
       description = ''
-        Color scheme name (used when useStylixColors is false).
+        Global default color scheme name (used when useStylixColors is false).
         Must match a file in templates/colors/<name>.rasi.
       '';
     };
@@ -166,7 +185,37 @@ in {
         border-radius = "10px";
         padding = "20px";
       };
-      description = "Style overrides applied on top of the theme type.";
+      description = "Style overrides applied on top of the global theme type.";
+    };
+
+    desktopThemes = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = {};
+      example = {
+        drun.type = "horizontal";
+        window.type = "compact";
+      };
+      description = ''
+        Per-desktop-mode theme overrides. Each key is a mode name
+        (drun, run, filebrowser, window) and the value is an attrset
+        with optional "type" and "color_scheme" keys. When a key is
+        omitted, the global default is used.
+      '';
+    };
+
+    appletThemes = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = {};
+      example = {
+        powermenu = { type = "rounded"; color_scheme = "dracula"; };
+        volume.type = "compact";
+      };
+      description = ''
+        Per-applet theme overrides. Each key is an applet name
+        (powermenu, volume, etc.) and the value is an attrset
+        with optional "type" and "color_scheme" keys. When a key is
+        omitted, the global default is used.
+      '';
     };
 
     extraConfig = lib.mkOption {
@@ -175,6 +224,7 @@ in {
       description = ''
         Additional applet configuration overrides merged into user_config.json.
         Use this to customize applets, commands, or layout overrides.
+        Takes precedence over appletThemes for the same applet.
       '';
     };
   };
@@ -187,10 +237,11 @@ in {
     home.file."/.config/rofi/bin".source = "${rofiSuitePackage}/share/rofi-suite/bin";
     home.file."/.config/rofi/bin".recursive = true;
 
-    # ── Deploy config files to ~/.config/rofi/suite/ ─────────────
-    # The assembled theme.rasi (built by build-theme.sh with stylix colors)
-    home.file."/.config/rofi/suite/theme.rasi".source =
-      "${rofiSuitePackage}/share/rofi-suite/styles/${cfg.themeType}.rasi";
+    # ── Deploy theme files to ~/.config/rofi/suite/ ──────────────
+    # Deploy the entire styles/ directory (all type+color combinations)
+    home.file."/.config/rofi/suite/styles".source =
+      "${rofiSuitePackage}/share/rofi-suite/styles";
+    home.file."/.config/rofi/suite/styles".recursive = true;
 
     # Shipped defaults.json
     home.file."/.config/rofi/suite/defaults.json".source =

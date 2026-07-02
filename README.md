@@ -25,7 +25,7 @@ Think of rofi theming like CSS:
 A **Type** defines the structural layout of the rofi window:
 
 - **rounded**: Centered modal with **rounded corners** (border-radius: 20px), spacious 40px padding, 2-column list, full widget set including message and mode-switcher
-- **horizontal**: **Horizontal list** layout (6 columns × 1 row), 900px wide, listview appears before inputbar, suitable for wide launchers
+- **horizontal**: **Horizontal list** layout (6 columns x 1 row), 900px wide, listview appears before inputbar, suitable for wide launchers
 - **compact**: **Narrow** (400px) and minimal — no message or mode-switcher, zero-spacing inputbar, no placeholder text
 - **bordered**: Clean layout with a **visible 1px border** around the window, 600px wide, full widget set
 - **iconic**: **Icon mode enabled** (show-icons: true), no message or mode-switcher, 12-line tall list, 800px wide
@@ -83,8 +83,9 @@ The configuration is split across two files that are deep-merged at runtime:
 
 The full structure with all default applets is in [`defaults.json`](defaults.json). Key sections:
 
-- **`theme`** — Type, color scheme, and style overrides
-- **`applets.*`** — Each applet has `prompt` (object with `message` + `icon`), `message`, `options[]`, `layout_overrides`, and optional fields like `confirm_*`. Options can carry `urgent_check` or `active_check` to dynamically highlight items based on live system state (e.g. mute status, repeat mode).
+- **`theme`** — Global default type, color scheme, and style overrides
+- **`desktop`** — Per-desktop-mode theme overrides (`drun`, `run`, `filebrowser`, `window`). Each can specify `theme.type` and `theme.color_scheme` to override the global defaults.
+- **`applets.*`** — Each applet has `prompt` (object with `message` + `icon`), `message`, `options[]`, `layout_overrides`, and optional `theme` override. Options can carry `urgent_check` or `active_check` to dynamically highlight items based on live system state (e.g. mute status, repeat mode).
 
 ### `user_config.json` (your overrides)
 
@@ -96,20 +97,19 @@ To customize, create or edit [`user_config.json`](user_config.json). You only ne
     "type": "rounded",
     "color_scheme": "catppuccin"
   },
+  "desktop": {
+    "drun": { "theme": { "type": "horizontal" } },
+    "window": { "theme": { "type": "compact" } }
+  },
   "applets": {
-    "apps": {
-      "prompt": {
-        "message": "My Apps",
-        "icon": ""
-      },
+    "powermenu": {
+      "theme": { "type": "rounded", "color_scheme": "dracula" },
       "options": [
-        { "label": { "text": "Kitty", "icon": "" }, "command": "kitty" }
+        { "label": { "text": "Shutdown", "icon": "" }, "command": "systemctl poweroff", "require_confirm": true }
       ]
     },
-    "powermenu": {
-      "options": [
-        { "label": { "text": "Shutdown", "icon": "" }, "command": "systemctl poweroff", "require_confirm": true }
-      ]
+    "volume": {
+      "theme": { "type": "compact" }
     }
   }
 }
@@ -117,13 +117,24 @@ To customize, create or edit [`user_config.json`](user_config.json). You only ne
 
 Since deep merging is recursive, you only need to specify the exact leaf values. For example, changing just the `color_scheme` inside `theme` doesn't require re-specifying `type` or `style_overrides`.
 
+### Per-launcher theme resolution
+
+Each desktop mode and applet can have its own theme. The resolution order is:
+
+1. **`--theme` CLI argument** (highest priority — overrides everything)
+2. **Per-launcher override** — `desktop.<mode>.theme` or `applets.<name>.theme`
+3. **Global default** — `theme.type` and `theme.color_scheme`
+
+When a per-launcher override specifies only `type` or only `color_scheme`, the missing field inherits from the global default. For example, if the global theme is `bordered` + `nord` and the powermenu overrides `type: "rounded"`, the powermenu gets `rounded` + `nord`.
+
 ### Applet Definitions
 
 Each applet is defined under `applets.*` in the configuration:
 
+- **`theme`**: Optional per-applet theme override `{ "type": "...", "color_scheme": "..." }`
 - **`prompt`**: An object `{ "message": "...", "icon": "..." }` — the rofi prompt text and its icon
 - **`message`**: Status message shown below the prompt (rofi's `-mesg`)
-- **`options`**: Array of menu items `{ "label": { "text": "Terminal", "icon": "" }, "command": "alacritty" }`
+- **`options`**: Array of menu items `{ "label": { "text": "Terminal", "icon": "" }, "command": "alacritty" }`
 - **`layout_overrides`**: Per-type column/row/width overrides
 - **`confirm_*`**: Confirmation dialog fields (for powermenu-style actions)
 - **`urgent_check`** / **`active_check`** (on options): Shell commands evaluated at runtime — when they exit 0, the matching option is highlighted with rofi's urgent or active styling, showing live state like "is audio muted?" or "is repeat on?"
@@ -140,21 +151,31 @@ Each applet is defined under `applets.*` in the configuration:
 ./build-theme.sh
 ```
 
-This reads the merged config (`defaults.json` + `user_config.json`), composes templates, applies overrides, and writes to `output/`:
+This reads the merged config (`defaults.json` + `user_config.json`), discovers all unique type+color combinations used by desktop modes and applets, and builds each one:
 
 ```
 output/
 └── styles/
-    └── bordered.rasi       # assembled theme (templates + color scheme inlined)
+    ├── bordered-nord.rasi       # bordered layout + nord colors
+    ├── rounded-dracula.rasi     # rounded layout + dracula colors
+    └── horizontal-nord.rasi     # horizontal layout + nord colors
 ```
 
-To use the built theme:
+To install:
 
 ```bash
 mkdir -p ~/.config/rofi/suite
-cp output/styles/bordered.rasi ~/.config/rofi/suite/theme.rasi
+cp -r output/styles ~/.config/rofi/suite/
 cp defaults.json ~/.config/rofi/suite/
 cp user_config.json ~/.config/rofi/suite/  # optional
+```
+
+### CLI flags
+
+You can build a single specific combination instead of auto-discovering:
+
+```bash
+./build-theme.sh --type rounded --color dracula
 ```
 
 ### Runtime (no build)
@@ -168,7 +189,7 @@ bin/rofi-desktop.sh run
 bin/rofi-desktop.sh --theme ./path/to/theme.rasi filebrowser
 ```
 
-Both scripts share the same config directory (`~/.config/rofi/suite/`), looking for `defaults.json`, `user_config.json`, and `theme.rasi`. `rofi-menu.sh` requires `jq`.
+Both scripts share the same config directory (`~/.config/rofi/suite/`), looking for `defaults.json`, `user_config.json`, and `styles/`. `rofi-menu.sh` requires `jq`.
 
 ---
 
@@ -179,11 +200,11 @@ Both scripts share the same config directory (`~/.config/rofi/suite/`), looking 
 1. Clone the repo
 2. Edit `user_config.json` with your overrides (or edit `defaults.json` directly if you prefer)
 3. Run `./build-theme.sh`
-4. Copy the built theme to `~/.config/rofi/suite/`:
+4. Install the built themes:
 
    ```bash
    mkdir -p ~/.config/rofi/suite
-   cp output/styles/bordered.rasi ~/.config/rofi/suite/theme.rasi
+   cp -r output/styles ~/.config/rofi/suite/
    cp defaults.json ~/.config/rofi/suite/
    cp user_config.json ~/.config/rofi/suite/  # optional
    ```
@@ -198,7 +219,7 @@ Both scripts share the same config directory (`~/.config/rofi/suite/`), looking 
 Both scripts resolve config files from the same `~/.config/rofi/suite/` directory:
 - `defaults.json` → shipped defaults (required)
 - `user_config.json` → personal overrides (optional)
-- `theme.rasi` → pre-built theme (shared by both scripts)
+- `styles/<type>-<color>.rasi` → pre-built theme files
 
 You can override any file via `--defaults`, `--config`, or `--theme` flags.
 
@@ -248,7 +269,19 @@ This repo provides a Nix flake with a Home Manager module for [Stylix](https://g
       border-radius = "10px";
     };
 
-    # Optional: applet overrides
+    # Optional: per-desktop-mode theme overrides
+    desktopThemes = {
+      drun = { type = "horizontal"; };
+      window = { type = "compact"; };
+    };
+
+    # Optional: per-applet theme overrides
+    appletThemes = {
+      powermenu = { type = "rounded"; color_scheme = "dracula"; };
+      volume = { type = "compact"; };
+    };
+
+    # Optional: other applet config overrides
     extraConfig = {
       apps = {
         prompt.message = "My Apps";
@@ -267,15 +300,15 @@ home-manager switch
 The module will:
 1. Read your Stylix base16 palette from `config.lib.stylix.colors`
 2. Generate `stylix.rasi` with the mapped colors (injected at build time)
-3. Run `build-theme.sh` to assemble the final `theme.rasi`
+3. Run `build-theme.sh` to assemble all needed type+color combinations
 4. Deploy config to `~/.config/rofi/suite/`:
-   - `theme.rasi` — assembled theme (built from your palette)
+   - `styles/` — all assembled theme files (built from your palette)
    - `defaults.json` — shipped defaults
    - `user_config.json` — generated from your module options
 5. Deploy scripts to `~/.config/rofi/`:
    - `bin/` — rofi-menu.sh, rofi-desktop.sh
 
-Both scripts (`rofi-menu.sh`, `rofi-desktop.sh`) resolve config from `~/.config/rofi/suite/` as usual.
+Both scripts (`rofi-menu.sh`, `rofi-desktop.sh`) resolve config from `~/.config/rofi/suite/` as usual. Each launcher automatically picks the correct theme file based on its per-launcher override (or the global default).
 
 #### Base16 color mapping
 
@@ -289,4 +322,3 @@ Both scripts (`rofi-menu.sh`, `rofi-desktop.sh`) resolve config from `~/.config/
 | `urgent` | `base08` | Urgent state (typically red) |
 
 Override any mapping via the `colorMapping` option.
-

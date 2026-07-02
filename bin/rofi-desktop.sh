@@ -2,21 +2,25 @@
 #
 # rofi-desktop.sh - Theme-aware desktop launcher (drun, run, filebrowser, window)
 #
+# Each desktop mode can have its own theme (type + color scheme).
+#
 # Usage: rofi-desktop.sh [options] [mode]
-#   e.g.: rofi-desktop.sh              → drun, default theme
-#         rofi-desktop.sh run          → run, default theme
+#   e.g.: rofi-desktop.sh              → drun, resolved theme
+#         rofi-desktop.sh run          → run, resolved theme
 #         rofi-desktop.sh --theme foo.rasi filebrowser
 #
 # Options:
 #   --config FILE    Path to user config JSON (overrides default lookup)
 #   --defaults FILE  Path to defaults JSON (overrides default lookup)
-#   --theme FILE     Path to .rasi theme file (overrides default lookup)
+#   --theme FILE     Path to .rasi theme file (overrides per-mode theme)
 #   -h, --help       Show this help message
 #
-# Config resolution (for each file, first found wins):
-#   1. Explicit CLI argument (--config, --defaults, --theme)
-#   2. $HOME/.config/rofi/suite/<filename>
-#   3. Error
+# Theme resolution (first match wins):
+#   1. --theme CLI argument (highest priority)
+#   2. desktop.<mode>.theme.type + desktop.<mode>.theme.color_scheme
+#   3. Global theme.type + theme.color_scheme (fallback)
+#
+# Resolved theme file: $ROFI_CONFIG_DIR/styles/<type>-<color>.rasi
 
 set -euo pipefail
 
@@ -45,13 +49,13 @@ Positional arguments:
 Options:
   --config FILE    Path to user config JSON (overrides default lookup)
   --defaults FILE  Path to defaults JSON (overrides default lookup)
-  --theme FILE     Path to .rasi theme file (overrides default lookup)
+  --theme FILE     Path to .rasi theme file (overrides per-mode theme)
   -h, --help       Show this help message
 
-Config resolution (for each file, first found wins):
-  1. Explicit CLI argument (--config, --defaults, --theme)
-  2. \$HOME/.config/rofi/suite/<filename>
-  3. Error
+Theme resolution (first match wins):
+  1. --theme CLI argument
+  2. desktop.<mode>.theme (type + color_scheme)
+  3. Global theme (type + color_scheme)
 
 Examples:
   $(basename "$0")
@@ -114,23 +118,41 @@ else
     merged=$(cat "$DEFAULTS_FILE")
 fi
 
-# ── Resolve theme .rasi file ───────────────────────────────────
-if [ -n "$THEME_FILE" ]; then
-    if [ ! -f "$THEME_FILE" ]; then
-        echo "Error: Theme file not found: $THEME_FILE"
-        exit 1
+# ── Resolve theme for this desktop mode ─────────────────────────
+resolve_theme() {
+    # Priority: CLI --theme > mode-specific > global default
+    if [ -n "$THEME_FILE" ]; then
+        echo "$THEME_FILE"
+        return
     fi
-else
-    FALLBACK_THEME="$ROFI_CONFIG_DIR/theme.rasi"
-    if [ -f "$FALLBACK_THEME" ]; then
-        THEME_FILE="$FALLBACK_THEME"
+
+    local mode_type mode_color global_type global_color
+
+    # Check per-mode theme override
+    mode_type=$(echo "$merged" | jq -re ".desktop.${MODE}.theme.type // empty" 2>/dev/null || true)
+    mode_color=$(echo "$merged" | jq -re ".desktop.${MODE}.theme.color_scheme // empty" 2>/dev/null || true)
+
+    # Fall back to global theme
+    global_type=$(echo "$merged" | jq -re '.theme.type // "bordered"')
+    global_color=$(echo "$merged" | jq -re '.theme.color_scheme // "nord"')
+
+    local resolved_type="${mode_type:-$global_type}"
+    local resolved_color="${mode_color:-$global_color}"
+
+    local theme_path="$ROFI_CONFIG_DIR/styles/${resolved_type}-${resolved_color}.rasi"
+
+    if [ -f "$theme_path" ]; then
+        echo "$theme_path"
     else
-        echo "Error: No theme file found"
-        echo "  Tried: $FALLBACK_THEME"
-        echo "  Provide one with --theme or place it in $ROFI_CONFIG_DIR/"
+        echo "Error: Resolved theme file not found: $theme_path"
+        echo "  Mode: $MODE"
+        echo "  Resolved: type=$resolved_type, color=$resolved_color"
+        echo "  Run build-theme.sh to generate theme files."
         exit 1
     fi
-fi
+}
+
+THEME_FILE=$(resolve_theme)
 
 # ── Launch rofi ─────────────────────────────────────────────────
 rofi \

@@ -2,21 +2,22 @@
 #
 # build-theme.sh - Pre-bake static .rasi files from templates and config
 #
-# Usage: ./build-theme.sh                           # Uses defaults.json + user_config.json
-#        ./build-theme.sh --type bordered --color nord --style overrides
+# Usage: ./build-theme.sh                           # Auto-discover all type+color combos from config
+#        ./build-theme.sh --type bordered --color nord  # Build a single specific combo
 #        ./build-theme.sh --output ./my-theme
-#        ./build-theme.sh --templates-dir /path/to/themes --defaults /path/to/defaults.json --config /path/to/user_config.json
 #
-# This generates ready-to-use .rasi files in the output/ directory.
-# Symlink output/ to ~/.config/rofi/ to use.
+# When no --type/--color is given, the script reads the merged config
+# (defaults.json + user_config.json) to discover all unique type+color
+# combinations needed by desktop modes and applets, then builds each
+# one as styles/<type>-<color>.rasi.
 #
 # Options:
 #   --templates-dir DIR   Path to templates directory (default: ./templates)
 #   --defaults FILE       Path to defaults.json (default: ./defaults.json)
 #   --config FILE         Path to user_config.json (default: ./user_config.json)
 #   --output DIR          Output directory (default: ./output)
-#   --type TYPE           Theme type (e.g. bordered, rounded, compact, horizontal, iconic)
-#   --color NAME          Color scheme name (e.g. nord, dracula, catppuccin)
+#   --type TYPE           Theme type — build only this type (e.g. bordered, rounded)
+#   --color NAME          Color scheme — build only this color (e.g. nord, dracula)
 #   --style JSON          Style overrides as JSON string
 #   -h, --help            Show this help message
 
@@ -29,9 +30,7 @@ OUTPUT_DIR="$SCRIPT_DIR/output"
 DEFAULTS_FILE="$SCRIPT_DIR/defaults.json"
 USER_CONFIG_FILE="$SCRIPT_DIR/user_config.json"
 
-# ── Defaults (overridden by config below) ──────────────────────
-THEME_TYPE="bordered"
-COLOR_SCHEME="nord"
+# ── Defaults ───────────────────────────────────────────────────
 STYLE_OVERRIDES=""
 
 # ── Parse command-line arguments ────────────────────────────────
@@ -41,13 +40,16 @@ Usage: $(basename "$0") [OPTIONS]
 
 Pre-bake static .rasi files from templates and config.
 
+When called without --type/--color, discovers all unique type+color
+combinations from the merged config and builds each one.
+
 Options:
   --templates-dir DIR   Path to templates directory (default: ./templates)
   --defaults FILE       Path to defaults.json (default: ./defaults.json)
   --config FILE         Path to user_config.json (default: ./user_config.json)
   --output DIR          Output directory (default: ./output)
-  --type TYPE           Theme type (e.g. bordered, rounded, compact, horizontal, iconic)
-  --color NAME          Color scheme name (e.g. nord, dracula, catppuccin)
+  --type TYPE           Build only this theme type (e.g. bordered, rounded)
+  --color NAME          Build only this color scheme (e.g. nord, dracula)
   --style JSON          Style overrides as JSON string
   -h, --help            Show this help message
 
@@ -91,70 +93,47 @@ else
     merged=$(cat "$DEFAULTS_FILE")
 fi
 
-# ── CLI args take precedence over config ───────────────────────
-# Save the CLI-parsed values (set during arg parsing above).
-# Only use config values when no CLI arg was provided.
-if [ -z "${_CLI_TYPE_SET:-}" ]; then
-    THEME_TYPE=$(echo "$merged" | jq -re '.theme.type // empty' || echo "$THEME_TYPE")
-fi
-if [ -z "${_CLI_COLOR_SET:-}" ]; then
-    COLOR_SCHEME=$(echo "$merged" | jq -re '.theme.color_scheme // empty' || echo "$COLOR_SCHEME")
-fi
-
-# ── Validate type ──────────────────────────────────────────────
-TYPE_FILE="$TEMPLATES_DIR/types/${THEME_TYPE}.rasi"
-if [ ! -f "$TYPE_FILE" ]; then
-    echo "Error: Type '$THEME_TYPE' not found at $TYPE_FILE"
-    echo "Available: $(ls "$TEMPLATES_DIR/types/"*.rasi 2>/dev/null | xargs -n1 basename | sed 's/\.rasi//')"
-    exit 1
-fi
-
-# ── Validate color scheme ──────────────────────────────────────
-COLOR_FILE="$TEMPLATES_DIR/colors/${COLOR_SCHEME}.rasi"
-if [ ! -f "$COLOR_FILE" ]; then
-    echo "Error: Color scheme '$COLOR_SCHEME' not found at $COLOR_FILE"
-    echo "Available: $(ls "$TEMPLATES_DIR/colors/"*.rasi 2>/dev/null | xargs -n1 basename | sed 's/\.rasi//')"
-    exit 1
-fi
-
-# ── Generate the assembled .rasi ──────────────────────────────
-echo "→ Building theme: type=${THEME_TYPE}, color=${COLOR_SCHEME}"
-echo "  Templates:  $TEMPLATES_DIR"
-echo "  Defaults:   $DEFAULTS_FILE"
-echo "  Config:     $USER_CONFIG_FILE"
-echo "  Output:     $OUTPUT_DIR"
-
-# Create output directories
-mkdir -p "$OUTPUT_DIR/styles"
-
-# ── 1. Read and assemble the type file ────────────────────────
-# Read the type file, substitute the @import for colors
-# The type file imports "_base.rasi", "_elements.rasi", "_widgets.rasi", "colors/nord.rasi"
-# We'll inline all of those into a single output file.
-
+# ── Assemble a single .rasi file ──────────────────────────────
+#   $1 = type name
+#   $2 = color scheme name
 assemble_rasi() {
-    local input_file="$1"
-    local output_file="$2"
-    local color_file="$3"
+    local type_name="$1"
+    local color_name="$2"
 
-    # Start with the core shared fragments
+    local type_file="$TEMPLATES_DIR/types/${type_name}.rasi"
+    local color_file="$TEMPLATES_DIR/colors/${color_name}.rasi"
+    local output_file="$OUTPUT_DIR/styles/${type_name}-${color_name}.rasi"
+
+    # Validate type
+    if [ ! -f "$type_file" ]; then
+        echo "Error: Type '$type_name' not found at $type_file"
+        echo "Available: $(ls "$TEMPLATES_DIR/types/"*.rasi 2>/dev/null | xargs -n1 basename | sed 's/\.rasi//')"
+        return 1
+    fi
+
+    # Validate color scheme
+    if [ ! -f "$color_file" ]; then
+        echo "Error: Color scheme '$color_name' not found at $color_file"
+        echo "Available: $(ls "$TEMPLATES_DIR/colors/"*.rasi 2>/dev/null | xargs -n1 basename | sed 's/\.rasi//')"
+        return 1
+    fi
+
+    # Assemble the .rasi file by inlining all fragments
     {
         echo "/**"
         echo " * Auto-generated by build-theme.sh"
-        echo " * Source: type=${THEME_TYPE}, color=${COLOR_SCHEME}"
+        echo " * Source: type=${type_name}, color=${color_name}"
         echo " */"
         echo ""
 
-        # Inline _base.rasi (skip the *{} block marker and add the global block)
+        # Inline _base.rasi
         if [ -f "$TEMPLATES_DIR/_base.rasi" ]; then
-            # Check if _base.rasi starts with a comment; pass through fully
             cat "$TEMPLATES_DIR/_base.rasi"
             echo ""
         fi
 
         # Inline _elements.rasi
         if [ -f "$TEMPLATES_DIR/_elements.rasi" ]; then
-            # Strip the heading comment from elements since we have our own
             grep -v "^/\*\*\*\*\*" "$TEMPLATES_DIR/_elements.rasi" 2>/dev/null || true
             echo ""
         fi
@@ -166,29 +145,85 @@ assemble_rasi() {
         fi
 
         # Inline the color scheme
-        if [ -f "$color_file" ]; then
-            cat "$color_file"
-            echo ""
-        fi
+        cat "$color_file"
+        echo ""
 
-        # Now read the type file, replacing @import lines with nothing
-        # (since we've already inlined everything)
-        sed -e 's/@import.*//' "$input_file"
+        # Inline the type file, stripping @import lines (already inlined)
+        sed -e 's/@import.*//' "$type_file"
     } > "$output_file"
 
-    echo "   ✓ $output_file"
+    echo "   ✓ ${type_name}-${color_name}.rasi"
 }
 
-# ── 2. Build launcher theme ───────────────────────────────────
-THEME_FILE="$OUTPUT_DIR/styles/${THEME_TYPE}.rasi"
-assemble_rasi "$TYPE_FILE" "$THEME_FILE" "$COLOR_FILE"
+# ── Create output directory ────────────────────────────────────
+mkdir -p "$OUTPUT_DIR/styles"
 
-# ── 3. Generate copy-to-config convenience ─────────────────────
+echo "→ Building theme(s)"
+echo "  Templates:  $TEMPLATES_DIR"
+echo "  Defaults:   $DEFAULTS_FILE"
+echo "  Config:     $USER_CONFIG_FILE"
+echo "  Output:     $OUTPUT_DIR"
+
+if [ "${_CLI_TYPE_SET:-}" ] && [ "${_CLI_COLOR_SET:-}" ]; then
+    # ── Single-combination build (explicit CLI args) ───────────
+    echo ""
+    assemble_rasi "$THEME_TYPE" "$COLOR_SCHEME"
+
+elif [ "${_CLI_TYPE_SET:-}" ] || [ "${_CLI_COLOR_SET:-}" ]; then
+    # ── Partial CLI: pair with config defaults ──────────────────
+    RESOLVED_TYPE="${THEME_TYPE:-$(echo "$merged" | jq -re '.theme.type // "bordered"')}"
+    RESOLVED_COLOR="${COLOR_SCHEME:-$(echo "$merged" | jq -re '.theme.color_scheme // "nord"')}"
+    echo ""
+    assemble_rasi "$RESOLVED_TYPE" "$RESOLVED_COLOR"
+
+else
+    # ── Auto-discover all unique type+color combinations ────────
+    # Collect combos from: global theme, desktop modes, and applets
+    declare -A COMBOS  # keys are "type|color"
+
+    # 1. Global theme default
+    global_type=$(echo "$merged" | jq -re '.theme.type // "bordered"')
+    global_color=$(echo "$merged" | jq -re '.theme.color_scheme // "nord"')
+    COMBOS["${global_type}|${global_color}"]=1
+
+    # 2. Desktop modes
+    for mode in $(echo "$merged" | jq -r '.desktop // {} | keys[]' 2>/dev/null); do
+        mode_type=$(echo "$merged" | jq -re ".desktop.${mode}.theme.type // empty" 2>/dev/null || true)
+        mode_color=$(echo "$merged" | jq -re ".desktop.${mode}.theme.color_scheme // empty" 2>/dev/null || true)
+        t="${mode_type:-$global_type}"
+        c="${mode_color:-$global_color}"
+        COMBOS["${t}|${c}"]=1
+    done
+
+    # 3. Applets
+    for applet in $(echo "$merged" | jq -r '.applets // {} | keys[]' 2>/dev/null); do
+        applet_type=$(echo "$merged" | jq -re ".applets.${applet}.theme.type // empty" 2>/dev/null || true)
+        applet_color=$(echo "$merged" | jq -re ".applets.${applet}.theme.color_scheme // empty" 2>/dev/null || true)
+        t="${applet_type:-$global_type}"
+        c="${applet_color:-$global_color}"
+        COMBOS["${t}|${c}"]=1
+    done
+
+    echo ""
+    echo "  Discovered ${#COMBOS[@]} unique theme combination(s):"
+    for combo in "${!COMBOS[@]}"; do
+        IFS='|' read -r t c <<< "$combo"
+        echo "   • type=${t}, color=${c}"
+    done
+    echo ""
+
+    for combo in "${!COMBOS[@]}"; do
+        IFS='|' read -r t c <<< "$combo"
+        assemble_rasi "$t" "$c"
+    done
+fi
+
+# ── Done ───────────────────────────────────────────────────────
 echo ""
 echo "→ Build complete. Output in: $OUTPUT_DIR"
 echo ""
 echo "To use:"
-echo "  ln -sf \"$OUTPUT_DIR\" ~/.config/rofi"
-echo ""
-echo "Or copy:"
 echo "  cp -r \"$OUTPUT_DIR/\"* ~/.config/rofi/"
+echo ""
+echo "Or symlink:"
+echo "  ln -sf \"$OUTPUT_DIR/styles\" ~/.config/rofi/styles"

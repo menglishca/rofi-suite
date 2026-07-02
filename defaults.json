@@ -4,6 +4,12 @@
     "color_scheme": "nord",
     "style_overrides": {}
   },
+  "desktop": {
+    "drun": {},
+    "run": {},
+    "filebrowser": {},
+    "window": {}
+  },
   "applets": {
     "apps": {
       "prompt": {

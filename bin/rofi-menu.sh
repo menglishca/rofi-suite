@@ -3,7 +3,7 @@
 # rofi-menu.sh - Custom data-driven menu runner
 #
 # Reads applet definitions from defaults.json merged with user_config.json
-# and shows a rofi menu with a user-provided theme.
+# and shows a rofi menu. Each applet can have its own theme (type + color).
 #
 # Usage: rofi-menu.sh [options] <menu_name>
 #   e.g.: rofi-menu.sh apps
@@ -13,13 +13,15 @@
 # Options:
 #   --config FILE    Path to user config JSON (overrides default lookup)
 #   --defaults FILE  Path to defaults JSON (overrides default lookup)
-#   --theme FILE     Path to .rasi theme file (overrides default lookup)
+#   --theme FILE     Path to .rasi theme file (overrides per-applet theme)
 #   -h, --help       Show this help message
 #
-# Config resolution (for each file, first found wins):
-#   1. Explicit CLI argument (--config, --defaults, --theme)
-#   2. $HOME/.config/rofi/suite/<filename>
-#   3. Error
+# Theme resolution (first match wins):
+#   1. --theme CLI argument (highest priority)
+#   2. applets.<name>.theme.type + applets.<name>.theme.color_scheme
+#   3. Global theme.type + theme.color_scheme (fallback)
+#
+# Resolved theme file: $ROFI_CONFIG_DIR/styles/<type>-<color>.rasi
 
 set -euo pipefail
 
@@ -46,19 +48,18 @@ defaults.json merged with user_config.json and shows a rofi menu.
 Options:
   --config FILE    Path to user config JSON (overrides default lookup)
   --defaults FILE  Path to defaults JSON (overrides default lookup)
-  --theme FILE     Path to .rasi theme file (overrides default lookup)
+  --theme FILE     Path to .rasi theme file (overrides per-applet theme)
   -h, --help       Show this help message
 
-Config resolution (for each file, first found wins):
-  1. Explicit CLI argument (--config, --defaults, --theme)
-  2. \$HOME/.config/rofi/suite/<filename>
-  3. Error
+Theme resolution (first match wins):
+  1. --theme CLI argument
+  2. applets.<name>.theme (type + color_scheme)
+  3. Global theme (type + color_scheme)
 
 Examples:
   $(basename "$0") apps
   $(basename "$0") --theme /path/to/theme.rasi powermenu
   $(basename "$0") --config /path/to/user_config.json volume
-  $(basename "$0") --defaults /path/to/defaults.json --theme /path/to/theme.rasi apps
 EOF
 }
 
@@ -123,24 +124,6 @@ else
     ROFI_CONFIG="$DEFAULTS_FILE"
 fi
 
-# ── Resolve theme .rasi file ───────────────────────────────────
-if [ -n "$THEME_FILE" ]; then
-    if [ ! -f "$THEME_FILE" ]; then
-        echo "Error: Theme file not found: $THEME_FILE"
-        exit 1
-    fi
-else
-    FALLBACK_THEME="$ROFI_CONFIG_DIR/theme.rasi"
-    if [ -f "$FALLBACK_THEME" ]; then
-        THEME_FILE="$FALLBACK_THEME"
-    else
-        echo "Error: No theme file found"
-        echo "  Tried: $FALLBACK_THEME"
-        echo "  Provide one with --theme or place it in $ROFI_CONFIG_DIR/"
-        exit 1
-    fi
-fi
-
 # ── Check jq ────────────────────────────────────────────────────
 JQ=$(command -v jq 2>/dev/null || echo "none")
 if [ "$JQ" = "none" ]; then
@@ -155,8 +138,55 @@ if ! jq -e ".applets.$APPLET" "$ROFI_CONFIG" >/dev/null 2>&1; then
     exit 1
 fi
 
+# ── Resolve theme for this applet ───────────────────────────────
+resolve_theme() {
+    # Priority: CLI --theme > applet-specific > global default
+    if [ -n "$THEME_FILE" ]; then
+        echo "$THEME_FILE"
+        return
+    fi
+
+    local applet_type applet_color global_type global_color
+
+    # Check per-applet theme override
+    applet_type=$(jq -r ".applets.${APPLET}.theme.type // empty" "$ROFI_CONFIG" 2>/dev/null || true)
+    applet_color=$(jq -r ".applets.${APPLET}.theme.color_scheme // empty" "$ROFI_CONFIG" 2>/dev/null || true)
+
+    # Fall back to global theme
+    global_type=$(jq -r '.theme.type // "bordered"' "$ROFI_CONFIG")
+    global_color=$(jq -r '.theme.color_scheme // "nord"' "$ROFI_CONFIG")
+
+    local resolved_type="${applet_type:-$global_type}"
+    local resolved_color="${applet_color:-$global_color}"
+
+    local theme_path="$ROFI_CONFIG_DIR/styles/${resolved_type}-${resolved_color}.rasi"
+
+    if [ -f "$theme_path" ]; then
+        echo "$theme_path"
+    else
+        echo "Error: Resolved theme file not found: $theme_path"
+        echo "  Applet: $APPLET"
+        echo "  Resolved: type=$resolved_type, color=$resolved_color"
+        echo "  Run build-theme.sh to generate theme files."
+        exit 1
+    fi
+}
+
+THEME_FILE=$(resolve_theme)
+
 # ── Extract theme type name from path ──────────────────────────
-type_name=$(basename "$THEME_FILE" .rasi)
+# Extract type from filename: styles/bordered-nord.rasi → bordered-nord
+# We need both type and color for layout_overrides lookup
+theme_filename=$(basename "$THEME_FILE" .rasi)
+# Split on last hyphen to get type and color
+# e.g., "rounded-dracula" → type_name="rounded", color_name="dracula"
+if [[ "$theme_filename" == *-* ]]; then
+    type_name="${theme_filename%-*}"
+    color_name="${theme_filename##*-}"
+else
+    type_name="$theme_filename"
+    color_name=""
+fi
 
 # ── Get layout overrides for current type from config ──────────
 get_layout() {
