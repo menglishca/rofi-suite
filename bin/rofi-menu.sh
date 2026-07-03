@@ -147,26 +147,33 @@ resolve_theme() {
     fi
 
     local applet_type applet_color global_type global_color
+    local track="applet"
 
     # Check per-applet theme override
     applet_type=$(jq -r ".applets.${APPLET}.theme.type // empty" "$ROFI_CONFIG" 2>/dev/null || true)
     applet_color=$(jq -r ".applets.${APPLET}.theme.color_scheme // empty" "$ROFI_CONFIG" 2>/dev/null || true)
 
-    # Fall back to global theme
-    global_type=$(jq -r '.theme.type // "bordered"' "$ROFI_CONFIG")
-    global_color=$(jq -r '.theme.color_scheme // "nord"' "$ROFI_CONFIG")
+    # Determine track from applet name
+    case "$APPLET" in
+        *power*) track="powermenu" ;;
+    esac
+
+    # Fall back to track-specific defaults
+    local defaults_key="${track}_theme"
+    global_type=$(jq -r ".${defaults_key}.type // \"bordered\"" "$ROFI_CONFIG")
+    global_color=$(jq -r ".${defaults_key}.color_scheme // \"nord\"" "$ROFI_CONFIG")
 
     local resolved_type="${applet_type:-$global_type}"
     local resolved_color="${applet_color:-$global_color}"
 
-    local theme_path="$ROFI_CONFIG_DIR/styles/${resolved_type}-${resolved_color}.rasi"
+    local theme_path="$ROFI_CONFIG_DIR/styles/${track}/${resolved_type}-${resolved_color}.rasi"
 
     if [ -f "$theme_path" ]; then
         echo "$theme_path"
     else
         echo "Error: Resolved theme file not found: $theme_path"
         echo "  Applet: $APPLET"
-        echo "  Resolved: type=$resolved_type, color=$resolved_color"
+        echo "  Resolved: track=$track, type=$resolved_type, color=$resolved_color"
         echo "  Run build-theme.sh to generate theme files."
         exit 1
     fi

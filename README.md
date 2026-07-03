@@ -20,20 +20,43 @@ Think of rofi theming like CSS:
 | **Style**        | Component variants (padding, border-radius) | Spacing, borders, sizing, fine-grained visual tweaks                                              |
 | **Color Scheme** | Design tokens / CSS custom properties       | 5-6 color variables: `background`, `foreground`, `selected`, `active`, `urgent`, `background-alt` |
 
-### Types
+### Types (Three-Track System)
 
-A **Type** defines the structural layout of the rofi window:
+Types are organized into three **tracks** based on their widget composition:
+
+#### Launcher Types (`templates/launcher-types/`)
+
+Full widget set: inputbar with search, mode-switcher, element-icon, 6-state elements
 
 - **rounded**: Centered modal with **rounded corners** (border-radius: 20px), spacious 40px padding, 2-column list, full widget set including message and mode-switcher
-- **horizontal**: **Horizontal list** layout (6 columns x 1 row), 900px wide, listview appears before inputbar, suitable for wide launchers
 - **compact**: **Narrow** (400px) and minimal — no message or mode-switcher, zero-spacing inputbar, no placeholder text
+- **grid**: **Glassmorphism** fullscreen layout with 5-column × 3-row icon grid, large 64px icons, semi-transparent background
 - **bordered**: Clean layout with a **visible 1px border** around the window, 600px wide, full widget set
 - **iconic**: **Icon mode enabled** (show-icons: true), no message or mode-switcher, 12-line tall list, 800px wide
+- **horizontal**: **Horizontal list** layout (6 columns x 1 row), 900px wide, listview appears before inputbar, suitable for wide launchers
+- **pill**: **Circular elements** (border-radius: 100px), background image support, vertical layout with 7 rows
+
+#### Applet Types (`templates/applet-types/`)
+
+Simplified widget set: no search input, no mode-switcher, 2-state elements
+
+- **rounded**, **compact**, **grid**, **bordered**, **iconic**, **horizontal**, **pill** — same visual themes as launcher types but with stripped-down widget composition
+
+#### Power Menu Types (`templates/powermenu-types/`)
+
+Unique power menu layouts with feather glyph icons
+
+- **centered**: 400px centered column, 5 vertical items
+- **inline-grid**: 800px horizontal 5-column grid
+- **fullscreen**: Fullscreen overlay with semi-transparent background
+- **pill**: Fullscreen overlay with circular pill buttons
+- **hero**: Background image + 6-column grid
+- **split**: Horizontal split with imagebox on left, list on right
 
 Each type is a complete `.rasi` file that:
-- Imports shared element definitions
+- Imports shared element definitions (`_base.rasi`, `_elements.rasi`, `_widgets.rasi`)
 - Imports a color scheme
-- Defines `window`, `mainbox`, `inputbar`, `listview` properties
+- Defines `window`, `mainbox`, `listview` properties
 - Specifies the `children` array for `mainbox`
 
 ### Styles
@@ -83,8 +106,10 @@ The configuration is split across two files that are deep-merged at runtime:
 
 The full structure with all default applets is in [`defaults.json`](defaults.json). Key sections:
 
-- **`theme`** — Global default type, color scheme, and style overrides
-- **`desktop`** — Per-desktop-mode theme overrides (`drun`, `run`, `filebrowser`, `window`). Each can specify `theme.type` and `theme.color_scheme` to override the global defaults.
+- **`launcher_theme`** — Default type, color scheme, and style overrides for desktop launchers
+- **`applet_theme`** — Default type and color scheme for applets (apps, volume, battery, etc.)
+- **`power_menu_theme`** — Default type and color scheme for power menu
+- **`desktop`** — Per-desktop-mode theme overrides (`drun`, `run`, `filebrowser`, `window`). Each can specify `theme.type` and `theme.color_scheme` to override the launcher defaults.
 - **`applets.*`** — Each applet has `prompt` (object with `message` + `icon`), `message`, `options[]`, `layout_overrides`, and optional `theme` override. Options can carry `urgent_check` or `active_check` to dynamically highlight items based on live system state (e.g. mute status, repeat mode).
 
 ### `user_config.json` (your overrides)
@@ -93,9 +118,17 @@ To customize, create or edit [`user_config.json`](user_config.json). You only ne
 
 ```json
 {
-  "theme": {
+  "launcher_theme": {
     "type": "rounded",
     "color_scheme": "catppuccin"
+  },
+  "applet_theme": {
+    "type": "compact",
+    "color_scheme": "nord"
+  },
+  "power_menu_theme": {
+    "type": "centered",
+    "color_scheme": "dracula"
   },
   "desktop": {
     "drun": { "theme": { "type": "horizontal" } },
@@ -219,7 +252,7 @@ Both scripts share the same config directory (`~/.config/rofi/suite/`), looking 
 Both scripts resolve config files from the same `~/.config/rofi/suite/` directory:
 - `defaults.json` → shipped defaults (required)
 - `user_config.json` → personal overrides (optional)
-- `styles/<type>-<color>.rasi` → pre-built theme files
+- `styles/<track>/<type>-<color>.rasi` → pre-built theme files
 
 You can override any file via `--defaults`, `--config`, or `--theme` flags.
 
@@ -254,9 +287,22 @@ This repo provides a Nix flake with a Home Manager module for [Stylix](https://g
 
   programs.rofi-suite = {
     enable = true;
-    themeType = "rounded";              # rounded | horizontal | compact | bordered | iconic
+
+    # Track-specific theme defaults
+    launcherTheme = {
+      type = "bordered";              # rounded | compact | grid | bordered | iconic | horizontal | pill
+      color_scheme = "nord";
+    };
+    appletTheme = {
+      type = "rounded";               # same launcher types
+      color_scheme = "nord";
+    };
+    powerMenuTheme = {
+      type = "centered";              # centered | inline-grid | fullscreen | pill | hero | split
+      color_scheme = "dracula";
+    };
+
     useStylixColors = true;             # generate colors from your Stylix base16 palette
-    # colorScheme = "nord";             # used when useStylixColors = false
 
     # Optional: override which base16 colors map to rofi variables
     colorMapping = {
@@ -277,7 +323,7 @@ This repo provides a Nix flake with a Home Manager module for [Stylix](https://g
 
     # Optional: per-applet theme overrides
     appletThemes = {
-      powermenu = { type = "rounded"; color_scheme = "dracula"; };
+      powermenu = { type = "centered"; color_scheme = "dracula"; };
       volume = { type = "compact"; };
     };
 

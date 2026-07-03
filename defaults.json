@@ -1,8 +1,16 @@
 {
-  "theme": {
+  "launcher_theme": {
     "type": "bordered",
     "color_scheme": "nord",
     "style_overrides": {}
+  },
+  "applet_theme": {
+    "type": "rounded",
+    "color_scheme": "nord"
+  },
+  "power_menu_theme": {
+    "type": "centered",
+    "color_scheme": "dracula"
   },
   "desktop": {
     "drun": {},

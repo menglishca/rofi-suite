@@ -1,0 +1,129 @@
+/*****----- Configuration -----*****/
+configuration {
+    modi:                       "drun,run,filebrowser";
+    show-icons:                 true;
+    display-drun:               "";
+    display-run:                "";
+    display-filebrowser:        "";
+    display-window:             "";
+    drun-display-format:        "{name}";
+    window-format:              "{w} · {c} · {t}";
+}
+
+/*****----- Imports -----*****/
+@import                          "../_base.rasi"
+@import                          "../_elements.rasi"
+@import                          "../_widgets.rasi"
+@import                          "../colors/nord.rasi"
+
+/*****----- Main Window -----*****/
+window {
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    fullscreen:                  true;
+    width:                       100%;
+    x-offset:                    0px;
+    y-offset:                    0px;
+    enabled:                     true;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-colour;
+    cursor:                      "default";
+    background-color:            rgba(0,0,0,0.1);
+}
+
+/*****----- Main Box -----*****/
+mainbox {
+    enabled:                     true;
+    spacing:                     20px;
+    margin:                      100px 200px;
+    padding:                     40px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-colour;
+    background-color:            transparent;
+    children:                    [ "message", "listview" ];
+}
+
+/*****----- Listview -----*****/
+listview {
+    enabled:                     true;
+    columns:                     5;
+    lines:                       3;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    reverse:                     false;
+    fixed-height:                true;
+    fixed-columns:               true;
+    spacing:                     20px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @border-colour;
+    background-color:            transparent;
+    text-color:                  @foreground-colour;
+    cursor:                      "default";
+}
+
+/*****----- Element overrides for grid applet layout -----*****/
+element {
+    orientation:                 vertical;
+    padding:                     20px;
+    border-radius:               10px;
+    background-color:            transparent;
+    text-color:                  @foreground-colour;
+}
+
+element-icon {
+    size:                        64px;
+    background-color:            transparent;
+    text-color:                  inherit;
+    padding:                     10px;
+    border-radius:               10px;
+}
+
+element-text {
+    background-color:            transparent;
+    text-color:                  inherit;
+    padding:                     5px;
+    border-radius:               5px;
+}
+
+element selected.normal {
+    background-color:            @selected-normal-background;
+    text-color:                  @selected-normal-foreground;
+}
+
+button {
+    padding:                     10px 20px;
+    border-radius:               5px;
+    background-color:            transparent;
+    text-color:                  @foreground-colour;
+}
+
+button selected {
+    background-color:            @selected-normal-background;
+    text-color:                  @selected-normal-foreground;
+}
+
+textbox {
+    background-color:            transparent;
+    text-color:                  @foreground-colour;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+}
+
+error-message {
+    padding:                     10px;
+    border:                      2px solid;
+    border-radius:               5px;
+    border-color:                @border-colour;
+    background-color:            @background-colour;
+    text-color:                  @foreground-colour;
+}

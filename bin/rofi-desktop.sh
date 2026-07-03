@@ -132,21 +132,21 @@ resolve_theme() {
     mode_type=$(echo "$merged" | jq -re ".desktop.${MODE}.theme.type // empty" 2>/dev/null || true)
     mode_color=$(echo "$merged" | jq -re ".desktop.${MODE}.theme.color_scheme // empty" 2>/dev/null || true)
 
-    # Fall back to global theme
-    global_type=$(echo "$merged" | jq -re '.theme.type // "bordered"')
-    global_color=$(echo "$merged" | jq -re '.theme.color_scheme // "nord"')
+    # Fall back to launcher_theme defaults
+    global_type=$(echo "$merged" | jq -re '.launcher_theme.type // "bordered"')
+    global_color=$(echo "$merged" | jq -re '.launcher_theme.color_scheme // "nord"')
 
     local resolved_type="${mode_type:-$global_type}"
     local resolved_color="${mode_color:-$global_color}"
 
-    local theme_path="$ROFI_CONFIG_DIR/styles/${resolved_type}-${resolved_color}.rasi"
+    local theme_path="$ROFI_CONFIG_DIR/styles/launcher/${resolved_type}-${resolved_color}.rasi"
 
     if [ -f "$theme_path" ]; then
         echo "$theme_path"
     else
         echo "Error: Resolved theme file not found: $theme_path"
         echo "  Mode: $MODE"
-        echo "  Resolved: type=$resolved_type, color=$resolved_color"
+        echo "  Resolved: track=launcher, type=$resolved_type, color=$resolved_color"
         echo "  Run build-theme.sh to generate theme files."
         exit 1
     fi

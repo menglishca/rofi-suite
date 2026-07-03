@@ -138,18 +138,70 @@ in {
       '';
     };
 
-    themeType = lib.mkOption {
-      type = lib.types.enum [ "rounded" "horizontal" "compact" "bordered" "iconic" ];
-      default = "bordered";
-      description = "The global default rofi theme type (layout).";
+    launcherTheme = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          type = lib.mkOption {
+            type = lib.types.enum [ "rounded" "horizontal" "compact" "bordered" "iconic" "grid" "pill" ];
+            default = "bordered";
+            description = "Default launcher theme type (layout).";
+          };
+          color_scheme = lib.mkOption {
+            type = lib.types.str;
+            default = "nord";
+            description = "Default launcher color scheme.";
+          };
+        };
+      };
+      default = {};
+      description = "Default launcher theme settings.";
+    };
+
+    appletTheme = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          type = lib.mkOption {
+            type = lib.types.enum [ "rounded" "horizontal" "compact" "bordered" "iconic" "grid" "pill" ];
+            default = "rounded";
+            description = "Default applet theme type (layout).";
+          };
+          color_scheme = lib.mkOption {
+            type = lib.types.str;
+            default = "nord";
+            description = "Default applet color scheme.";
+          };
+        };
+      };
+      default = {};
+      description = "Default applet theme settings.";
+    };
+
+    powerMenuTheme = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          type = lib.mkOption {
+            type = lib.types.enum [ "centered" "inline-grid" "fullscreen" "pill" "hero" "split" ];
+            default = "centered";
+            description = "Default power menu theme type (layout).";
+          };
+          color_scheme = lib.mkOption {
+            type = lib.types.str;
+            default = "dracula";
+            description = "Default power menu color scheme.";
+          };
+        };
+      };
+      default = {};
+      description = "Default power menu theme settings.";
     };
 
     colorScheme = lib.mkOption {
       type = lib.types.str;
       default = "nord";
       description = ''
-        Global default color scheme name (used when useStylixColors is false).
+        Fallback color scheme name (used when useStylixColors is false).
         Must match a file in templates/colors/<name>.rasi.
+        Individual track defaults take precedence over this value.
       '';
     };
 
